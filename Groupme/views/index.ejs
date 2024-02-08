@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= title %></title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <h1><%= title %></h1>
+    <p>Welcome to <%= title %></p>
+    <form action="/" method="post">
+      <label for="authorName">Search author name:</label>
+      <input type="text" id="authorName" name="authorName">
+      <br>
+      <label for="searchText">Search text:</label>
+      <input type="text" id="searchText" name="searchText">
+      <br>
+      <label for="afterDate">Search "after" date</label>
+      <input type="date" id="afterDate" name="afterDate">
+      <label for="beforeDate">Search "before" date</label>
+      <input type="date" id="beforeDate" name="beforeDate">
+      <br>
+      <label for="rank">Rank by likes?</label>
+      <select name="rank" id="rank">
+        <option value="yes">Yes</option>
+        <option value="no">No</option>
+      </select>
+      <button type="submit">Submit</button>
+  </form>
+  <% if (result) { %>
+      <div id="result">
+        <ul>
+          <% for(let i = 0; i < result.length; i++) { %>
+              <p><%= result[i].date %></p>
+              <b><%= result[i].author %></b>
+              <% if (result[i].text != null&&result[i].text.substring(0, 4)!="http") { %>
+                <p><%= result[i].text %></p>
+              <% } %>
+              <% if (result[i].text == null)  { %>
+                <br>
+                <a href="<%= result[i].img %>"" target="_blank" rel="noopener noreferrer">Link to img</a>
+              <% } %>
+              <% if (result[i].text!=null&&result[i].text.substring(0, 4)=="http") { %>
+                <br>
+                <a href="<%= result[i].text %>"" target="_blank" rel="noopener noreferrer">Link to video</a>
+              <% } %>
+              <p style="color: blue">Likes: <%= result[i].likes %></p>
+              <br>
+          <% } %>
+      </ul>
+    </div>
+  <% } %>
+  </body>
+</html>
