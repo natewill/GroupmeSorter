@@ -11,9 +11,10 @@ exports.groupmeFunc = async function(author, bD, aD, sT) {
   if(afterDate=="Invalid Date"){
     afterDate = new Date("12/01/2020")
   }
+
+  var groupStartDate = await axios.get("https://api.groupme.com/v3/groups/"+choloID+accessToken).created_at
   var searchText = sT
-  var doneCounter = 0;
-  for (let i = 0; i < 500; i++) {
+  for (let i = 0; i < 700; i++) {
     await axios
       .get(
         "https://api.groupme.com/v3/groups/" +
@@ -60,12 +61,10 @@ exports.groupmeFunc = async function(author, bD, aD, sT) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
-          doneCounter++
-          /*
-          if(doneCounter >= 200){
+          if(groupmeDateToUnix <= new Date(groupStartDate)){
             return responsesArray
           }
-          */
+
           lastID = messages.id;
         });
       })
@@ -76,11 +75,30 @@ exports.groupmeFunc = async function(author, bD, aD, sT) {
   return responsesArray
 }
 
-exports.runInOrder =  async function(rank, author, beforeDate, afterDate, searchText, groupmeFunc) {
-  responsesArray = await groupmeFunc(author, beforeDate, afterDate, searchText);
-  var rank = rank=="yes" ? true : false
-  if (rank) {
-    responsesArray.sort((a, b) => b.likes - a.likes);
-  }
-  return responsesArray
+function rankFunc(responsesArray){
+  
+}
+
+exports.sortResponses = function(rank, responsesArray, author, bD, aD, sT) {
+  var beforeDate = new Date(bD)
+  var afterDate = new Date(aD)
+  var searchText = sT;
+  var newResponses = []
+
+  for(let i=0; i<responsesArray.length; i++){
+    groupme = responsesArray[i]
+    var groupmeDateToUnix = new Date(groupme.date)
+    if ((author!= "" && groupme.author.includes(author))||(author=="") 
+      && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
+      && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
+      && ((searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText))||(searchText==""))) {
+        newResponses.push(groupme);
+        doneCounter = 0;
+      }
+    }
+
+    if(rank){
+      newResponses.sort((a, b) => b.likes - a.likes);
+    }
+    return newResponses;
 }
