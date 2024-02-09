@@ -1,24 +1,30 @@
 const axios = require("axios");
+const { response } = require("express");
 
 const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
-const choloID = "44332781";
 
-exports.groupmeFunc = async function(author, bD, aD, sT) {
-  var lastID = 170702090068488782;
+exports.groupmeFunc = async function(groupMeId, author, bD, aD, sT) {
+  var lastID = "";
   var responsesArray = [];
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
+  
   if(afterDate=="Invalid Date"){
     afterDate = new Date("12/01/2020")
   }
-
-  var groupStartDate = await axios.get("https://api.groupme.com/v3/groups/"+choloID+accessToken).created_at
+  var groupStartDate = ""
+  await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
+    groupStartDate = response.data.response.created_at
+    lastId = response.data.response.messages.last_message_id
+  }).catch((error) => {
+    console.error(error);
+  })
   var searchText = sT
   for (let i = 0; i < 700; i++) {
     await axios
       .get(
         "https://api.groupme.com/v3/groups/" +
-          choloID +
+          groupMeId +
           "/messages" +
           accessToken,
         {
@@ -61,7 +67,7 @@ exports.groupmeFunc = async function(author, bD, aD, sT) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
-          if(groupmeDateToUnix <= new Date(groupStartDate)){
+          if(groupmeDateToUnix <= new Date(groupStartDate * 1000)){
             return responsesArray
           }
 
@@ -73,10 +79,6 @@ exports.groupmeFunc = async function(author, bD, aD, sT) {
       });
   }
   return responsesArray
-}
-
-function rankFunc(responsesArray){
-  
 }
 
 exports.sortResponses = function(rank, responsesArray, author, bD, aD, sT) {
