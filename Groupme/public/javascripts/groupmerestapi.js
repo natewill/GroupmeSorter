@@ -3,24 +3,26 @@ const { response } = require("express");
 
 const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
 
-exports.groupmeFunc = async function(groupMeId, author, bD, aD, sT) {
+exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   var lastID = "";
+  var groupMessageLength = 0;
   var responsesArray = [];
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
-  
+
   if(afterDate=="Invalid Date"){
     afterDate = new Date("12/01/2020")
   }
-  var groupStartDate = ""
+
   await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
-    groupStartDate = response.data.response.created_at
+    groupMessageLength = response.data.response.messages.count
     lastId = response.data.response.messages.last_message_id
   }).catch((error) => {
     console.error(error);
   })
-  var searchText = sT
-  for (let i = 0; i < 700; i++) {
+
+  MainLoop:
+  for (let i = 0; i < 400; i++) {
     await axios
       .get(
         "https://api.groupme.com/v3/groups/" +
@@ -35,10 +37,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, sT) {
         }
       )
       .then((response) => {
-        var i = 0;
-        response.data.response.messages.forEach((messages) => {
-          i++;
-
+        for(let messages of response.data.response.messages) {
           var messageDate = new Date(messages.created_at * 1000);
           var groupme = {
             date:
@@ -56,9 +55,6 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, sT) {
             groupme.img = messages.attachments[0].url;
           }
 
-          //big if statement gotta check that
-          //if(searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText)){
-          //}
           var groupmeDateToUnix = new Date(groupme.date)
           if ((author!= "" && groupme.author.includes(author))||(author=="") 
             && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
@@ -67,12 +63,13 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, sT) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
-          if(groupmeDateToUnix <= new Date(groupStartDate * 1000)){
+          if(responsesArray.length >= groupMessageLength){
+            i=400
             return responsesArray
           }
 
           lastID = messages.id;
-        });
+        };
       })
       .catch((error) => {
         console.error(error);
