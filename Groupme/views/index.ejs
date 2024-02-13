@@ -11,8 +11,9 @@
       <label for="groupMeId">Pick Groupme</label>
       <input type="text" id="groupMeId" name="groupMeId">
       <br>
-      <label for="authorName">Search author name:</label>
-      <input type="text" id="authorName" name="authorName">
+      <label for="authorName">Search by author:</label>
+      <input type="text" id="authorName" name="authorName" placeholder="Start typing...">
+      <ul id="suggestions" style="list-style-type: none;"></ul>
       <br>
       <label for="searchText">Search text:</label>
       <input type="text" id="searchText" name="searchText">
@@ -29,6 +30,36 @@
       </select>
       <button type="submit">Submit</button>
   </form>
+  <script>
+    document.getElementById('authorName').addEventListener('input', function() {
+    const inputElement = this; // Store reference to the input element
+    const input = this.value;
+    if (input.length > 0) {
+        fetch(`/autocomplete?q=${encodeURIComponent(input)}`)
+            .then(response => response.json())
+            .then(data => {
+                const suggestionsList = document.getElementById('suggestions');
+                suggestionsList.innerHTML = ''; // Clear previous suggestions
+                data.forEach(item => {
+                    const li = document.createElement('li');
+                    li.textContent = item;
+                    li.style.cursor = 'pointer'; // Make it look clickable
+                    li.onclick = function() {
+                        inputElement.value = this.textContent; // Set input value to clicked suggestion
+                        suggestionsList.innerHTML = ''; // Clear suggestions after selection
+                        // Optional: Automatically submit the form after selection
+                        // document.getElementById('searchForm').submit();
+                    };
+                    suggestionsList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Error fetching suggestions:', error));
+    } else {
+        document.getElementById('suggestions').innerHTML = ''; // Clear suggestions if input is empty
+    }
+});
+
+  </script>
   <% if (result) { %>
       <div id="result">
         <ul>

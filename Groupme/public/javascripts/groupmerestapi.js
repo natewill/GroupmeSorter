@@ -9,7 +9,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   var responsesArray = [];
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
-
+  var members = []
   if(afterDate=="Invalid Date"){
     afterDate = new Date("12/01/2020")
   }
@@ -17,12 +17,12 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
     groupMessageLength = response.data.response.messages.count
     lastId = response.data.response.messages.last_message_id
+    
   }).catch((error) => {
     console.error(error);
   })
 
-  MainLoop:
-  for (let i = 0; i < 400; i++) {
+  for (let i = 0; i < 1000; i++) {
     await axios
       .get(
         "https://api.groupme.com/v3/groups/" +
@@ -63,8 +63,9 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
+            //console.log(new Date(groupme.date))
           if(responsesArray.length >= groupMessageLength){
-            i=400
+            i=1000
             return responsesArray
           }
 
@@ -101,3 +102,14 @@ exports.sortResponses = function(rank, responsesArray, author, bD, aD, sT) {
     }
     return newResponses;
 }
+
+exports.getUsers = async function(groupMeId){
+  var members = []
+  await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
+    members = response.data.response.members
+  }).catch((error) => {
+    console.error(error);
+  })
+  return members
+}
+
