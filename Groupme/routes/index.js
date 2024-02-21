@@ -1,16 +1,17 @@
-const {sortResponses, groupmeFunc, getUsers} = require("../public/javascripts/groupmerestapi.js")
+const {sortResponses, groupmeFunc, getUsers, getGroups} = require("../public/javascripts/groupmerestapi.js")
 
 var express = require('express');
 var router = express.Router();
 
 var cache = {}
-var groupMeId = 
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'GroupMeSorter' , result: null});
+router.get('/', async function(req, res, next) {
+  var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
+  res.render('index', { title: 'GroupMeSorter' , result: null, groups: groups});
 });
 
 router.post('/', async (req, res) => {
 
+  var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
   var newResultJson = []
 
   const authorName = req.body.authorName
@@ -30,9 +31,9 @@ router.post('/', async (req, res) => {
       newResultJson = sortResponses(rank, cache[groupMeId], authorName, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null)
-      res.render('index', {title: 'GroupMeSorter', result: newResultJson})
+      res.render('index', {title: 'GroupMeSorter', result: newResultJson, groups: groups, rank: rank})
   } else {
-    res.render('index', {title: 'GroupMeSorter', result: null})
+    res.render('index', {title: 'GroupMeSorter', result: null, groups: groups, rank: rank})
   }
 });
 

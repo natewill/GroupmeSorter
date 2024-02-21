@@ -5,7 +5,8 @@ const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
 
 exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   var lastID = "";
-  var groupMessageLength = 0;
+  var messagesPerPage = 100;
+  var groupMeNumberOfMessages = 0;
   var responsesArray = [];
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
@@ -15,9 +16,11 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   }
 
   await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
-    groupMessageLength = response.data.response.messages.count
     lastId = response.data.response.messages.last_message_id
-    
+    groupMeNumberOfMessages = response.data.response.messages.count
+    if(response.data.response.messages.count < 100){
+      messagesPerPage = response.data.response.messages.count
+    }
   }).catch((error) => {
     console.error(error);
   })
@@ -31,7 +34,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
           accessToken,
         {
           params: {
-            limit: "100",
+            limit: messagesPerPage.toString(),
             before_id: lastID.toString(),
           },
         }
@@ -63,13 +66,18 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
-            //console.log(new Date(groupme.date))
-          if(responsesArray.length >= groupMessageLength){
+
+          groupMeNumberOfMessages--
+          if(groupMeNumberOfMessages < 100){
+            messagesPerPage = groupMeNumberOfMessages
+          }
+          if(responsesArray.length >= groupMeNumberOfMessages){
             i=1000
             return responsesArray
           }
 
           lastID = messages.id;
+          
         };
       })
       .catch((error) => {
@@ -111,5 +119,21 @@ exports.getUsers = async function(groupMeId){
     console.error(error);
   })
   return members
+}
+
+//change per page eventually because people could have more than 100 groups ig.
+exports.getGroups = async function(accessToken){
+  var groups = []
+  await axios.get("https://api.groupme.com/v3/groups"+accessToken, {params: {
+    per_page: 100,
+    omit: 'memberships'
+  }}).then((response) => {
+    for(let group of response.data.response){
+      groups.push({'id' : group.id, 'name' :group.name})
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+  return groups
 }
 

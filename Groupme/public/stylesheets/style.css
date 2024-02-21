@@ -1,8 +1,112 @@
 body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  line-height: 1.6;
+  padding: 20px;
+  margin: 0;
+}
+.result-item {
+  display: flex;
+  align-items: center; /* Align items vertically */
+  border-bottom: 2px solid #eee; /* Thin line separator */
+  padding-bottom: 10px; /* Space above the border */
+  margin-bottom: 10px; /* Space below the border */
+}
+
+.result-content {
+  flex-grow: 1; /* Allow the content to take up the remaining space */
+}
+
+h2 {
+  margin-right: 10px; /* Space between the rank number and the content */
+  color: black; /* Adjusted here for visibility */
+}
+
+/* Ensure the last item does not have a bottom border */
+.result-item:last-child {
+  border-bottom: none;
+}
+
+h1 {
+  color: #333;
+}
+
+form {
+  background: #ffffff;
+  padding: 15px; /* Reduced padding */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"],
+input[type="date"],
+select {
+  width: 48%; /* Adjusted for inline display */
+  padding: 8px; /* Reduced padding */
+  margin-bottom: 10px; /* Reduced margin */
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+  display: inline-block; /* Inline display */
+  margin-right: 4%; /* Space between inline elements */
+}
+
+input[type="text"]:last-child,
+input[type="date"]:last-child,
+select:last-child {
+  margin-right: 0; /* Removes margin from last element */
+}
+
+button[type="submit"] {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: block; /* Ensure button takes full width */
+  width: 100%;
+}
+
+button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+ul#suggestions {
+  padding-left: 0;
+  margin-top: 0;
+}
+
+ul#suggestions li {
+  background-color: #ffffff;
+  padding: 10px;
+  border-bottom: 1px solid #eeeeee;
+  list-style-type: none;
+}
+
+ul#suggestions li:hover {
+  background-color: #f8f8f8;
+}
+
+#result {
+  margin-top: 20px;
+}
+
+#result ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+#result p, #result b, #result a {
+  margin: 5px 0;
 }
 
 a {
-  color: #00B7FF;
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
 }
