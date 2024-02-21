@@ -43,6 +43,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
         for(let messages of response.data.response.messages) {
           var messageDate = new Date(messages.created_at * 1000);
           var groupme = {
+            id: messages.id,
             date:
               (messageDate.getMonth() + 1).toString() +
               "/" +
@@ -53,7 +54,6 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
             text: messages.text,
             likes: messages.favorited_by.length,
           };
-
           if (groupme.text == null) {
             groupme.img = messages.attachments[0].url;
           }
@@ -135,5 +135,106 @@ exports.getGroups = async function(accessToken){
     console.error(error);
   })
   return groups
+}
+
+//inefficent but i don't give a fuck to be honest
+//gotta change the limit because potential 304 errors
+exports.inContext = async function(groupMeId, messageId){
+  var messagesBefore = []
+  var messagesAfter = []
+  var message = []
+  await axios.get(
+    "https://api.groupme.com/v3/groups/" +
+      groupMeId +
+      "/messages" +
+      accessToken,
+    {
+      params: {
+        limit: 5,
+        before_id: messageId,
+      },
+    }
+  ).then((response) => {
+    for(let messages of response.data.response.messages){
+      var messageDate = new Date(messages.created_at * 1000);
+          var groupme = {
+            date:
+              (messageDate.getMonth() + 1).toString() +
+              "/" +
+              messageDate.getDate().toString() +
+              "/" +
+              messageDate.getFullYear().toString(),
+            author: messages.name,
+            text: messages.text,
+            likes: messages.favorited_by.length,
+          };
+      messagesBefore.push(groupme)
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+
+  await axios.get(
+    "https://api.groupme.com/v3/groups/" +
+      groupMeId +
+      "/messages" +
+      accessToken,
+    {
+      params: {
+        limit: 5,
+        after_id: messageId,
+      },
+    }
+  ).then((response) => {
+    for(let messages of response.data.response.messages){
+      var messageDate = new Date(messages.created_at * 1000);
+          var groupme = {
+            date:
+              (messageDate.getMonth() + 1).toString() +
+              "/" +
+              messageDate.getDate().toString() +
+              "/" +
+              messageDate.getFullYear().toString(),
+            author: messages.name,
+            text: messages.text,
+            likes: messages.favorited_by.length,
+          };
+      messagesAfter.push(groupme)
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+
+  await axios.get(
+    "https://api.groupme.com/v3/groups/" +
+      groupMeId +
+      "/messages" +
+      accessToken,
+    {
+      params: {
+        limit: 1,
+      },
+    }
+  ).then((response) => {
+    for(let messages of response.data.response.messages){
+      var messageDate = new Date(messages.created_at * 1000);
+          var groupme = {
+            date:
+              (messageDate.getMonth() + 1).toString() +
+              "/" +
+              messageDate.getDate().toString() +
+              "/" +
+              messageDate.getFullYear().toString(),
+            author: messages.name,
+            text: messages.text,
+            likes: messages.favorited_by.length,
+          };
+      message.push(groupme)
+    }
+  }).catch((error) => {
+    console.error(error);
+  })
+
+  return [messagesBefore, messagesAfter, message]
 }
 
