@@ -3,20 +3,15 @@ const { response } = require("express");
 
 const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
 
-exports.groupmeFunc = async function(groupMeId, authorId, bD, aD, searchText) {
-  var lastID = "";
+exports.groupmeFunc = async function(groupMeId) {
+  const numberOfMessages = 1000 // times 100
   var messagesPerPage = 100;
-  var groupMeNumberOfMessages = 0;
-  var responsesArray = [];
-  var beforeDate = new Date(bD)
-  var afterDate = new Date(aD)
-  var members = []
-  var messageAfter = ""
-  var numberOfMessages = 1000 // times 100
 
-  if(afterDate=="Invalid Date"){
-    afterDate = new Date("12/01/2020")
-  }
+  var lastID = "";
+  var groupMeNumberOfMessages;
+  var responsesArray = []
+  var members = []
+  var lastMessageInLoop;
 
   await axios.get("https://api.groupme.com/v3/groups/"+groupMeId+accessToken).then((response) => {
     lastId = response.data.response.messages.last_message_id
@@ -43,49 +38,40 @@ exports.groupmeFunc = async function(groupMeId, authorId, bD, aD, searchText) {
         }
       )
       .then((response) => {
-        for(let messages of response.data.response.messages) {
-          var messageDate = new Date(messages.created_at * 1000);
+        for(let message of response.data.response.messages) {
+          var messageDate = new Date(message.created_at * 1000);
           var groupme = {
-            id: messages.id,
+            id: message.id,
             date:
               (messageDate.getMonth() + 1).toString() +
               "/" +
               messageDate.getDate().toString() +
               "/" +
               messageDate.getFullYear().toString(),
-            author: messages.name,
-            authorId: messages.user_id,
-            text: messages.text,
-            likes: messages.favorited_by.length,
+            author: message.name,
+            authorId: message.user_id,
+            text: message.text,
+            likes: message.favorited_by.length,
           };
           if (groupme.text == null) {
-            groupme.img = messages.attachments[0].url;
+            groupme.img = message.attachments[0].url;
           }
 
-          //functionality for in context shitty code just leave me alone
-          groupme['messageAfter'] = messageAfter
-          messageAfter = groupme.id
-
-          var groupmeDateToUnix = new Date(groupme.date)
-          if ((authorId!= "" && groupme.authorId==authorId)||(authorId=="") 
-            && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
-            && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
-            && ((searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText))||(searchText==""))) {
-              responsesArray.push(groupme);
-              doneCounter = 0;
-            }
-          //console.log(groupMeNumberOfMessages)
+          responsesArray.push(groupme);
           groupMeNumberOfMessages--
+
           if(groupMeNumberOfMessages < 100){
             messagesPerPage = groupMeNumberOfMessages
           }
-          if(responsesArray.length >= groupMeNumberOfMessages){
+
+          console.log(groupMeNumberOfMessages)
+          if(groupMeNumberOfMessages <= 0){
             i=numberOfMessages
-            return responsesArray
           }
 
-          lastID = messages.id;
-          
+          //functionality for in context shitty code just leave me alone
+          groupme['messageAfter'] = lastID
+          lastID = message.id;
         };
       })
       .catch((error) => {
@@ -109,7 +95,7 @@ exports.sortResponses = function(rank, responsesArray, authorId, bD, aD, sT) {
     if ((authorId!= "" && groupme.authorId==authorId)||(authorId=="") 
       && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
       && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
-      && ((searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText))||(searchText==""))) {
+      && ((searchText!=""&&groupme.text!=null&&groupme.text.toLowerCase().includes(searchText.toLowerCase()))||(searchText==""))) {
         newResponses.push(groupme);
         doneCounter = 0;
       }

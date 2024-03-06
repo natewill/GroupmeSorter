@@ -48,7 +48,7 @@ router.post('/', async (req, res) => {
     try {
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText); 
     } catch {
-      cache[groupMeId] = await groupmeFunc(groupMeId, "", "", "", "")
+      cache[groupMeId] = await groupmeFunc(groupMeId)
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null)
