@@ -64,7 +64,6 @@ exports.groupmeFunc = async function(groupMeId) {
             messagesPerPage = groupMeNumberOfMessages
           }
 
-          console.log(groupMeNumberOfMessages)
           if(groupMeNumberOfMessages <= 0){
             i=numberOfMessages
           }
