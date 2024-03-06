@@ -9,13 +9,18 @@ body {
 .result-item {
   display: flex;
   align-items: center; /* Align items vertically */
-  border-bottom: 2px solid #eee; /* Thin line separator */
+  border-bottom: 3px solid #eee; /* Thin line separator */
   padding-bottom: 10px; /* Space above the border */
   margin-bottom: 10px; /* Space below the border */
 }
 
 .result-content {
   flex-grow: 1; /* Allow the content to take up the remaining space */
+}
+
+.highlight {
+  background-color: yellow;
+  font-weight: bold;
 }
 
 h2 {
@@ -83,7 +88,7 @@ ul#suggestions {
 ul#suggestions li {
   background-color: #ffffff;
   padding: 10px;
-  border-bottom: 1px solid #eeeeee;
+  border-bottom: 2px solid #eeeeee;
   list-style-type: none;
 }
 

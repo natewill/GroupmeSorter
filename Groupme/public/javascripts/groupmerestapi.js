@@ -3,7 +3,7 @@ const { response } = require("express");
 
 const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
 
-exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
+exports.groupmeFunc = async function(groupMeId, authorId, bD, aD, searchText) {
   var lastID = "";
   var messagesPerPage = 100;
   var groupMeNumberOfMessages = 0;
@@ -11,6 +11,9 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
   var members = []
+  var messageAfter = ""
+  var numberOfMessages = 1000 // times 100
+
   if(afterDate=="Invalid Date"){
     afterDate = new Date("12/01/2020")
   }
@@ -25,7 +28,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
     console.error(error);
   })
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < numberOfMessages; i++) {
     await axios
       .get(
         "https://api.groupme.com/v3/groups/" +
@@ -51,6 +54,7 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
               "/" +
               messageDate.getFullYear().toString(),
             author: messages.name,
+            authorId: messages.user_id,
             text: messages.text,
             likes: messages.favorited_by.length,
           };
@@ -58,21 +62,25 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
             groupme.img = messages.attachments[0].url;
           }
 
+          //functionality for in context shitty code just leave me alone
+          groupme['messageAfter'] = messageAfter
+          messageAfter = groupme.id
+
           var groupmeDateToUnix = new Date(groupme.date)
-          if ((author!= "" && groupme.author.includes(author))||(author=="") 
+          if ((authorId!= "" && groupme.authorId==authorId)||(authorId=="") 
             && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
             && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
             && ((searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText))||(searchText==""))) {
               responsesArray.push(groupme);
               doneCounter = 0;
             }
-
+          //console.log(groupMeNumberOfMessages)
           groupMeNumberOfMessages--
           if(groupMeNumberOfMessages < 100){
             messagesPerPage = groupMeNumberOfMessages
           }
           if(responsesArray.length >= groupMeNumberOfMessages){
-            i=1000
+            i=numberOfMessages
             return responsesArray
           }
 
@@ -83,11 +91,13 @@ exports.groupmeFunc = async function(groupMeId, author, bD, aD, searchText) {
       .catch((error) => {
         console.error(error);
       });
+
+      
   }
   return responsesArray
 }
 
-exports.sortResponses = function(rank, responsesArray, author, bD, aD, sT) {
+exports.sortResponses = function(rank, responsesArray, authorId, bD, aD, sT) {
   var beforeDate = new Date(bD)
   var afterDate = new Date(aD)
   var searchText = sT;
@@ -96,7 +106,7 @@ exports.sortResponses = function(rank, responsesArray, author, bD, aD, sT) {
   for(let i=0; i<responsesArray.length; i++){
     groupme = responsesArray[i]
     var groupmeDateToUnix = new Date(groupme.date)
-    if ((author!= "" && groupme.author.includes(author))||(author=="") 
+    if ((authorId!= "" && groupme.authorId==authorId)||(authorId=="") 
       && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
       && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
       && ((searchText!=""&&groupme.text!=null&&groupme.text.includes(searchText))||(searchText==""))) {
@@ -139,7 +149,7 @@ exports.getGroups = async function(accessToken){
 
 //inefficent but i don't give a fuck to be honest
 //gotta change the limit because potential 304 errors
-exports.inContext = async function(groupMeId, messageId){
+exports.inContext = async function(groupMeId, messageId, messageAfter){
   var messagesBefore = []
   var messagesAfter = []
   var message = []
@@ -212,7 +222,8 @@ exports.inContext = async function(groupMeId, messageId){
       accessToken,
     {
       params: {
-        limit: 1,
+        limit: 2,
+        after_id: messageAfter
       },
     }
   ).then((response) => {
@@ -235,6 +246,7 @@ exports.inContext = async function(groupMeId, messageId){
     console.error(error);
   })
 
+  messagesBefore = messagesBefore.reverse()
   return [messagesBefore, messagesAfter, message]
 }
 

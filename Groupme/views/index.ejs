@@ -5,8 +5,12 @@
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
+    <div id="head"></div>
     <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
+    <p>Welcome to The <%= title %></p>
+    <p>By <b>Nate Williams</b></p>
+    <a src="https://oauth.groupme.com/oauth/authorize?client_id=9qAyyvBjOrPsvkrrFA6Lgmq3I5g5kvPqquGIVkYv4lOoMDXi">Log In</a>
+  </div>
     <form action="/" method="post">
       <% if (groups) { %>
       <label for="groupMeId">Choose a Groupme:</label>
@@ -34,7 +38,7 @@
         <option value="yes">Yes</option>
         <option value="no">No</option>
       </select>
-      <button type="submit">Submit</button>
+      <button type="submit" onclick="addSearchTextToUrl()">Submit</button>
   </form>
   <script>
     document.getElementById('authorName').addEventListener('input', function() {
@@ -65,6 +69,7 @@
     }
 });
 
+
   </script>
   <% if (result) { %>
     <div id="result">
@@ -91,10 +96,28 @@
             </div>
             <p style="color: blue">Likes: <%= result[i].likes %></p>
           </div>
-          <a href="/incontext?messageId=<%=result[i].id%>">In Context</a>
+          <a href="/incontext?messageId=<%=result[i].id%>&?messageAfter=<%=result[i].messageAfter%>">In Context</a>
         </div>
       <% } %>
     </div>
   <% } %>  
+  <script>
+    function addSearchTextToUrl() {
+        const searchText = document.getElementById('searchText').value;
+        const form = document.querySelector('form');
+        const url = new URL(form.action, window.location.origin);
+        url.searchParams.set('searchText', searchText);
+        form.action = url.toString();
+      }
+
+      const searchText = '<%= searchText %>';
+      const resultElements = document.querySelectorAll('.result-content p');
+
+      resultElements.forEach(resultElement => {
+        const text = resultElement.textContent;
+        const highlightedText = text.replace(new RegExp(searchText, 'gi'), `<span class="highlight">$&</span>`);
+        resultElement.innerHTML = highlightedText;
+      });
+  </script>
   </body>
 </html>
