@@ -1,8 +1,6 @@
 const axios = require("axios");
 
-const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
-
-exports.groupmeFunc = async function(groupMeId) {
+exports.groupmeFunc = async function(groupMeId, accessToken) {
   const numberOfMessages = 350; //* 10^2
   let messagesPerPage = 100;
   let lastID = "";

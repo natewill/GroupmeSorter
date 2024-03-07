@@ -1,7 +1,5 @@
 const {sortResponses, groupmeFunc, getUsers, getGroups, inContext} = require("../public/javascripts/groupmerestapi.js")
 
-const https = require('https');
-const fs = require('fs');
 var express = require('express');
 var router = express.Router();
 
@@ -14,15 +12,14 @@ var groupUsers = []
 router.get('/', async function(req, res, next) {
   if(!(req.query === undefined)){
     accessToken = req.query.access_token
-    console.log(accessToken)
   }
-  var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
+  var groups = await getGroups(accessToken)
   res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null, rank: false, groupMeId: '', beforeDate: '', afterDate: '', authorName: ''});
 });
 
 router.post('/', async (req, res) => {
 
-  var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
+  var groups = await getGroups(accessToken)
   var newResultJson = []
 
   const authorName = req.body.authorName || ''
@@ -96,15 +93,5 @@ router.get('/incontext', async (req, res) => {
   res.render('incontext', {messagesBefore: temp[0], messagesAfter: temp[1], message: temp[2]})
 
 })
-
-const sslServerOptions = {
-  key: fs.readFileSync('localhost.key'),
-  cert: fs.readFileSync('localhost.crt')
-};
-
-// Create an HTTPS server
-https.createServer(sslServerOptions, router).listen(4000, () => {
-  console.log('Server is running on https://localhost:4000');
-});
 
 module.exports = router;
