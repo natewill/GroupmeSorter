@@ -17,7 +17,7 @@ router.get('/', async function(req, res, next) {
     console.log(accessToken)
   }
   var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
-  res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null});
+  res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null, rank: false});
 });
 
 router.post('/', async (req, res) => {
@@ -52,9 +52,13 @@ router.post('/', async (req, res) => {
       cache[groupMeId] = await groupmeFunc(groupMeId)
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText)
     }
-    if(newResultJson!=null)
+    if(newResultJson!=null){
       currGroupCache = newResultJson
+      for(var i=0; i<newResultJson; i++){
+        console.log(newResultJson[i])
+      }
       res.render('index', {title: 'GroupMeArchive', result: newResultJson, groups: groups, rank: rank, searchText: searchText})
+    }
   } else {
     res.render('index', {title: 'GroupMeArchive', result: null, groups: groups, rank: rank, searchText: searchText})
   }
