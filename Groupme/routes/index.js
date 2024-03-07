@@ -17,7 +17,7 @@ router.get('/', async function(req, res, next) {
     console.log(accessToken)
   }
   var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
-  res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null, rank: false});
+  res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null, rank: false, groupMeId: '', beforeDate: '', afterDate: '', authorName: ''});
 });
 
 router.post('/', async (req, res) => {
@@ -25,11 +25,11 @@ router.post('/', async (req, res) => {
   var groups = await getGroups("?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj")
   var newResultJson = []
 
-  const authorName = req.body.authorName
-  const beforeDate = req.body.beforeDate
-  const afterDate = req.body.afterDate
-  const searchText = req.body.searchText
-  var rank = req.body.rank
+  const authorName = req.body.authorName || ''
+  const beforeDate = req.body.beforeDate || ''
+  const afterDate = req.body.afterDate || ''
+  const searchText = req.body.searchText || ''
+  var rank = req.body.rank || 'false'
   groupMeId = req.body.groupMeId==null ? "" : req.body.groupMeId.toString()
   groupUsers = await getUsers(groupMeId);
   rank = rank=="yes" ? true : false
@@ -54,13 +54,10 @@ router.post('/', async (req, res) => {
     }
     if(newResultJson!=null){
       currGroupCache = newResultJson
-      for(var i=0; i<newResultJson; i++){
-        console.log(newResultJson[i])
-      }
-      res.render('index', {title: 'GroupMeArchive', result: newResultJson, groups: groups, rank: rank, searchText: searchText})
+      res.render('index', {title: 'GroupMeArchive', result: newResultJson, groups: groups, rank: rank, searchText: searchText, groupMeId: groupMeId, beforeDate: beforeDate, afterDate: afterDate, authorName: authorName})
     }
   } else {
-    res.render('index', {title: 'GroupMeArchive', result: null, groups: groups, rank: rank, searchText: searchText})
+    res.render('index', {title: 'GroupMeArchive', result: "", groups: groups, rank: rank, searchText: searchText, groupMeId: groupMeId, beforeDate: beforeDate, afterDate: afterDate, authorName: authorName})
   }
 });
 

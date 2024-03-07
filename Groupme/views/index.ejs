@@ -16,27 +16,27 @@
         <label for="groupMeId">Choose a Groupme:</label>
         <select name="groupMeId" id="groupMeId">
           <% groups.forEach(function(group) { %>
-          <option value="<%= group.id %>"><%= group.name %></option>
+            <option value="<%= group.id %>" <%= group.id == groupMeId ? 'selected' : '' %>><%= group.name %></option>
           <% }); %>
         </select>
         <br />
         <% }; %>
         <label for="authorName">Search by author:</label>
-        <input type="text" id="authorName" name="authorName" placeholder="Start typing..." />
+        <input type="text" id="authorName" name="authorName" placeholder="Start typing..." value="<%= authorName %>"/>
         <ul id="suggestions" style="list-style-type: none;"></ul>
         <label for="searchText">Search text:</label>
-        <input type="text" id="searchText" name="searchText" />
+        <input type="text" id="searchText" name="searchText" value="<%= searchText %>"/>
         <br />
         <label for="afterDate">Search "after" date</label>
-        <input type="date" id="afterDate" name="afterDate" />
+        <input type="date" id="afterDate" name="afterDate" value="<%= afterDate %>"/>
         <br />
         <label for="beforeDate">Search "before" date</label>
-        <input type="date" id="beforeDate" name="beforeDate" />
+        <input type="date" id="beforeDate" name="beforeDate" value="<%= beforeDate %>"/>
         <br />
         <label for="rank">Rank by likes?</label>
         <select name="rank" id="rank">
-          <option value="yes">Yes</option>
-          <option value="no">No</option>
+          <option value="yes" <%= rank == 'true' || rank == null ? 'selected' : '' %>>Yes</option>
+          <option value="no" <%= rank == 'false' ? 'selected' : '' %>>No</option>
         </select>
         <button type="submit" onclick="addSearchTextToUrl()">Submit</button>
       </form>
@@ -44,7 +44,7 @@
     <div id="resultsContainer">
       <% if (result && result != "") { %>
       <div id="result">
-        <% for(let i = 0; i < 10; i++) { %>
+        <% for(let i = 0; i < Math.min(10, result.length); i++) { %>
         <div class="result-item">
           <% if (rank) { %>
           <h2><%= i+1 %></h2>
@@ -106,8 +106,10 @@
         const searchText = document.getElementById('searchText').value;
         const form = document.querySelector('form');
         const url = new URL(form.action, window.location.origin);
-        url.searchParams.set('searchText', searchText);
-        form.action = url.toString();
+        if(searchText != ""){
+          url.searchParams.set('searchText', searchText);
+          form.action = url.toString();
+        }
       }
 
       const searchText = '<%= searchText %>';
