@@ -8,18 +8,25 @@ var currGroupCache = []
 var groupMeId = ""
 var accessToken = ""
 var groupUsers = []
+var groups = []
 
 router.get('/', async function(req, res, next) {
-  if(!(req.query === undefined)){
-    accessToken = req.query.access_token
+  if(!(req.query === undefined) && !(req.query.access_token == 'undefined')){
+    console.log(accessToken)
+    accessToken = "?token="+req.query.access_token
   }
-  var groups = await getGroups(accessToken)
+
+  console.log("HEY RIGHT HERE " + accessToken)
+  if(accessToken != "" && accessToken != '?token=undefined'){ 
+    groups = await getGroups(accessToken)
+  }
   res.render('index', { title: 'GroupMeArchive' , result: null, groups: groups, searchText: null, rank: false, groupMeId: '', beforeDate: '', afterDate: '', authorName: ''});
 });
 
 router.post('/', async (req, res) => {
 
-  var groups = await getGroups(accessToken)
+  if(accessToken != "" && accessToken != undefined) groups = await getGroups(accessToken)
+
   var newResultJson = []
 
   const authorName = req.body.authorName || ''
@@ -28,7 +35,7 @@ router.post('/', async (req, res) => {
   const searchText = req.body.searchText || ''
   var rank = req.body.rank || 'false'
   groupMeId = req.body.groupMeId==null ? "" : req.body.groupMeId.toString()
-  groupUsers = await getUsers(groupMeId);
+  groupUsers = await getUsers(groupMeId, accessToken);
   rank = rank=="yes" ? true : false
 
   //if we're looking for an author, find his user id then search by that instead of his name
@@ -46,7 +53,7 @@ router.post('/', async (req, res) => {
     try {
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText); 
     } catch {
-      cache[groupMeId] = await groupmeFunc(groupMeId)
+      cache[groupMeId] = await groupmeFunc(groupMeId, accessToken)
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null){
@@ -88,7 +95,7 @@ router.get('/incontext', async (req, res) => {
   var messageAfter = req.query.messageAfter
   var messagesBefore = []
   var messagesAfter = []
-  var temp = await inContext(groupMeId, messageId, messageAfter)
+  var temp = await inContext(groupMeId, messageId, messageAfter, accessToken)
   console.log(temp[2])
   res.render('incontext', {messagesBefore: temp[0], messagesAfter: temp[1], message: temp[2]})
 

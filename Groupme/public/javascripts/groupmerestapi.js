@@ -87,7 +87,7 @@ exports.sortResponses = function(rank, responsesArray, authorId, bD, aD, sT) {
   return newResponses;
 };
 
-exports.getUsers = async function(groupMeId) {
+exports.getUsers = async function(groupMeId, accessToken) {
   try {
     const response = await axios.get(`https://api.groupme.com/v3/groups/${groupMeId}${accessToken}`);
     return response.data.response.members;
@@ -118,7 +118,7 @@ exports.getGroups = async function(accessToken) {
   }
 };
 
-exports.inContext = async function(groupMeId, messageId, messageAfter) {
+exports.inContext = async function(groupMeId, messageId, messageAfter, accessToken) {
   const messagesBefore = [];
   const messagesAfter = [];
   const message = [];
