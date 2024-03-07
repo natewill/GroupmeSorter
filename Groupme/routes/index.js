@@ -6,6 +6,7 @@ var express = require('express');
 var router = express.Router();
 
 var cache = {}
+var currGroupCache = []
 var groupMeId = ""
 var accessToken = ""
 var groupUsers = []
@@ -52,6 +53,7 @@ router.post('/', async (req, res) => {
       newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null)
+      currGroupCache = newResultJson
       res.render('index', {title: 'GroupMeArchive', result: newResultJson, groups: groups, rank: rank, searchText: searchText})
   } else {
     res.render('index', {title: 'GroupMeArchive', result: null, groups: groups, rank: rank, searchText: searchText})
@@ -69,6 +71,18 @@ router.get('/autocomplete', async (req, res) => {
     name.toLowerCase().startsWith(query)
 );
   res.json(suggestions);
+});
+
+router.get('/loadMoreResults', async (req, res) => {
+  const page = parseInt(req.query.page, 10);
+  const resultsPerPage = parseInt(req.query.resultsPerPage, 10);
+
+  // Slice the results based on the current page and results per page
+  const startIndex = (page - 1) * resultsPerPage;
+  const endIndex = startIndex + resultsPerPage;
+  const paginatedResults = currGroupCache.slice(startIndex, endIndex);
+
+  res.json(paginatedResults);
 });
 
 router.get('/incontext', async (req, res) => {

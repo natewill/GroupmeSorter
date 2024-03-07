@@ -4,7 +4,7 @@ const { response } = require("express");
 const accessToken = "?token=prraXW47Lw8MODGw5ND1VH0ou0mwa9HCkoiXBTyj";
 
 exports.groupmeFunc = async function(groupMeId) {
-  const numberOfMessages = 1000 // times 100
+  const numberOfMessages = 350 // * 10^2
   var messagesPerPage = 100;
 
   var lastID = "";
@@ -64,10 +64,10 @@ exports.groupmeFunc = async function(groupMeId) {
             messagesPerPage = groupMeNumberOfMessages
           }
 
-          if(groupMeNumberOfMessages <= 0){
+          if(responsesArray.length >= numberOfMessages*100 || groupMeNumberOfMessages <= 0 || new Date(groupme.date) <= new Date("12/01/2020")){
             i=numberOfMessages
+            return responsesArray
           }
-
           //functionality for in context shitty code just leave me alone
           groupme['messageAfter'] = lastID
           lastID = message.id;
@@ -76,8 +76,6 @@ exports.groupmeFunc = async function(groupMeId) {
       .catch((error) => {
         console.error(error);
       });
-
-      
   }
   return responsesArray
 }
@@ -96,7 +94,6 @@ exports.sortResponses = function(rank, responsesArray, authorId, bD, aD, sT) {
       && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
       && ((searchText!=""&&groupme.text!=null&&groupme.text.toLowerCase().includes(searchText.toLowerCase()))||(searchText==""))) {
         newResponses.push(groupme);
-        doneCounter = 0;
       }
     }
 
