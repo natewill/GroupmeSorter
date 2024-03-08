@@ -67,7 +67,7 @@
             </div>
             <p style="color: blue">Likes: <%= result[i].likes %></p>
           </div>
-          <a href="/incontext?messageId=<%=result[i].id%>&?messageAfter=<%=result[i].messageAfter%>">In Context</a>
+          <a href="/incontext?messageId=<%=result[i].id%>&?messageAfter=<%=result[i].messageAfter%>">Context</a>
         </div>
         <% } %>
       </div>
@@ -183,7 +183,7 @@
             <div>${resultContent}</div>
             <p style="color: blue">Likes: ${result.likes}</p>
           </div>
-          <a href="/incontext?messageId=${result.id}&?messageAfter=${result.messageAfter}">In Context</a>
+          <a href="/incontext?messageId=${result.id}&?messageAfter=${result.messageAfter}">Context</a>
         `;
 
         return resultItem;

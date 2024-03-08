@@ -1,9 +1,10 @@
 const {sortResponses, groupmeFunc, getUsers, getGroups, inContext} = require("../public/javascripts/groupmerestapi.js")
 
+const NodeCache = require('node-cache');
 var express = require('express');
 var router = express.Router();
 
-var cache = {}
+const cache = new NodeCache();
 var currGroupCache = []
 var groupMeId = ""
 var accessToken = ""
@@ -12,11 +13,9 @@ var groups = []
 
 router.get('/', async function(req, res, next) {
   if(!(req.query === undefined) && !(req.query.access_token == 'undefined')){
-    console.log(accessToken)
     accessToken = "?token="+req.query.access_token
   }
 
-  console.log("HEY RIGHT HERE " + accessToken)
   if(accessToken != "" && accessToken != '?token=undefined'){ 
     groups = await getGroups(accessToken)
   }
@@ -51,10 +50,10 @@ router.post('/', async (req, res) => {
 
   if(groupMeId != ""){
     try {
-      newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText); 
+      newResultJson = sortResponses(rank, cache.get(groupMeId), authorId, beforeDate, afterDate, searchText); 
     } catch {
-      cache[groupMeId] = await groupmeFunc(groupMeId, accessToken)
-      newResultJson = sortResponses(rank, cache[groupMeId], authorId, beforeDate, afterDate, searchText)
+      cache.set(groupMeId, await groupmeFunc(groupMeId, accessToken))
+      newResultJson = sortResponses(rank, cache.get(groupMeId), authorId, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null){
       currGroupCache = newResultJson
@@ -96,7 +95,6 @@ router.get('/incontext', async (req, res) => {
   var messagesBefore = []
   var messagesAfter = []
   var temp = await inContext(groupMeId, messageId, messageAfter, accessToken)
-  console.log(temp[2])
   res.render('incontext', {messagesBefore: temp[0], messagesAfter: temp[1], message: temp[2]})
 
 })
