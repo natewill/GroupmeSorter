@@ -5,12 +5,14 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
   let messagesPerPage = 100;
   let lastID = "";
   let groupMeNumberOfMessages;
+  let groupMeCreationDate = "";
   const responsesArray = [];
 
   try {
     const response = await axios.get(`https://api.groupme.com/v3/groups/${groupMeId}${accessToken}`);
     lastID = response.data.response.messages.last_message_id;
     groupMeNumberOfMessages = response.data.response.messages.count;
+    groupMeCreationDate = response.data.response.created_at;
     if (response.data.response.messages.count < 100) {
       messagesPerPage = response.data.response.messages.count;
     }
@@ -19,6 +21,9 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
   }
 
   for (let i = 0; i < numberOfMessages; i++) {
+    if(groupMeNumberOfMessages < 100) {
+      messagesPerPage = groupMeNumberOfMessages-1;
+    }
     try {
       const response = await axios.get(`https://api.groupme.com/v3/groups/${groupMeId}/messages${accessToken}`, {
         params: {
@@ -50,7 +55,7 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
           messagesPerPage = groupMeNumberOfMessages;
         }
 
-        if (responsesArray.length >= numberOfMessages * 100 || groupMeNumberOfMessages <= 0 || new Date(groupme.date) <= new Date("12/01/2020")) {
+        if (responsesArray.length >= numberOfMessages * 100 || groupMeNumberOfMessages <= 1 || new Date(groupme.date) <= new Date("12/01/2020")) {
           i = numberOfMessages;
           break;
         }
@@ -58,6 +63,7 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
       }
     } catch (error) {
       console.error(error);
+      i = numberOfMessages;
     }
   }
 
@@ -175,7 +181,6 @@ exports.inContext = async function(groupMeId, messageId, messageAfter, accessTok
       },
     });
     
-    console.log(messageAfter)
     for (const messages of responseMessage.data.response.messages) {
       const messageDate = new Date(messages.created_at * 1000);
       const groupme = {
