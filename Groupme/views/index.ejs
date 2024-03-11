@@ -42,6 +42,9 @@
       </form>
     </div>
     <div id="resultsContainer">
+      <% if(result == ""){ %>
+        <h3>No results!</h3>
+      <% } %>
       <% if (result && result != "") { %>
       <div id="result">
         <% for(let i = 0; i < Math.min(10, result.length); i++) { %>
