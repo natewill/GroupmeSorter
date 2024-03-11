@@ -170,11 +170,12 @@ exports.inContext = async function(groupMeId, messageId, messageAfter, accessTok
   try {
     const responseMessage = await axios.get(`https://api.groupme.com/v3/groups/${groupMeId}/messages${accessToken}`, {
       params: {
-        limit: 2,
-        after_id: messageAfter,
+        limit: 1,
+        before_id: messageAfter,
       },
     });
-
+    
+    console.log(messageAfter)
     for (const messages of responseMessage.data.response.messages) {
       const messageDate = new Date(messages.created_at * 1000);
       const groupme = {
