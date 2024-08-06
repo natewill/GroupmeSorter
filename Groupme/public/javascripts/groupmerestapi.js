@@ -1,7 +1,7 @@
 const axios = require("axios");
 
-exports.groupmeFunc = async function(groupMeId, accessToken) {
-  const numberOfMessages = 350; //* 10^2
+exports.groupmeFunc = async function(groupMeId, accessToken, beforeDate=0) {
+  const numberOfMessages = 300; //* 10^2
   let messagesPerPage = 100;
   let lastID = "";
   let groupMeNumberOfMessages;
@@ -41,13 +41,20 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
           authorId: message.user_id,
           text: message.text,
           likes: message.favorited_by.length,
-          messageAfter: lastID, // Functionality for in-context
+          messageAfter: lastID,
         };
 
         if (groupme.text == null) {
           groupme.img = message.attachments[0].url;
         }
 
+        
+        //i think this works? i hope so
+        if(new Date(groupme.date) <= new Date(beforeDate*1000)){
+          i = numberOfMessages
+          break
+        }
+        
         responsesArray.push(groupme);
         groupMeNumberOfMessages--;
 
@@ -55,6 +62,8 @@ exports.groupmeFunc = async function(groupMeId, accessToken) {
           messagesPerPage = groupMeNumberOfMessages;
         }
 
+        
+        
         if (responsesArray.length >= numberOfMessages * 100 || groupMeNumberOfMessages <= 1 || new Date(groupme.date) <= new Date("12/01/2020")) {
           i = numberOfMessages;
           break;
@@ -198,3 +207,23 @@ exports.inContext = async function(groupMeId, messageId, messageAfter, accessTok
   messagesBefore.reverse();
   return [messagesBefore, messagesAfter, message];
 };
+
+//the before date functionality isnt perfect because it checks if the *days* of the two messages are
+//equal, even if the exact time is different
+exports.checkIsUpToDate = async function(groupMeId, accessToken, currCachedData){
+  try {
+    if(currCachedData == undefined){
+      return true
+    }
+    const response = await axios.get(`https://api.groupme.com/v3/groups/${groupMeId}${accessToken}`);
+
+    last_message_created_at= response.data.response.messages.last_message_created_at;
+    if(new Date(last_message_created_at*1000).toDateString() == new Date(currCachedData[0].date).toDateString()){
+      return true
+    } 
+    return false
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}

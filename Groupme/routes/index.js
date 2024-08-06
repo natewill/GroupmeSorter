@@ -1,4 +1,4 @@
-const {sortResponses, groupmeFunc, getUsers, getGroups, inContext} = require("../public/javascripts/groupmerestapi.js")
+const {sortResponses, groupmeFunc, getUsers, getGroups, inContext, checkIsUpToDate} = require("../public/javascripts/groupmerestapi.js")
 
 const NodeCache = require('node-cache');
 var express = require('express');
@@ -12,6 +12,7 @@ var groupUsers = []
 var groups = []
 
 router.get('/', async function(req, res, next) {
+  
   if(!(req.query === undefined) && !(req.query.access_token == 'undefined')){
     accessToken = "?token="+req.query.access_token
   }
@@ -50,9 +51,13 @@ router.post('/', async (req, res) => {
 
   if(groupMeId != ""){
     try {
+      currCachedData = cache.get(groupMeId)
+      if(!checkIsUpToDate(groupMeId, accessToken, currCachedData) && currCachedData!=undefined){
+        cache.set(groupmeFunc(groupMeId, accessToken, currCachedData[0].date).push(currCachedData))
+      }
       newResultJson = sortResponses(rank, cache.get(groupMeId), authorId, beforeDate, afterDate, searchText); 
     } catch {
-      cache.set(groupMeId, await groupmeFunc(groupMeId, accessToken))
+      cache.set(groupMeId, await groupmeFunc(groupMeId, accessToken, ""))
       newResultJson = sortResponses(rank, cache.get(groupMeId), authorId, beforeDate, afterDate, searchText)
     }
     if(newResultJson!=null){
