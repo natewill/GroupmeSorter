@@ -39,12 +39,12 @@ router.post('/', async (req, res) => {
   rank = rank=="yes" ? true : false
 
   //if we're looking for an author, find his user id then search by that instead of his name
-  var authorId = "";
-
+  var authorId = [];
+  
   if(authorName != ""){
     for(let user of groupUsers){
-      if(user.nickname == authorName){
-        authorId = user.user_id
+      if(user.nickname == authorName || user.nickname.toLowerCase().includes(authorName.toLowerCase())){
+        authorId.push(user.user_id);
       }
     }
   }

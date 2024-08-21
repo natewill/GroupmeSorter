@@ -88,7 +88,7 @@ exports.sortResponses = function(rank, responsesArray, authorId, bD, aD, sT) {
   for(let i=0; i<responsesArray.length; i++){
     groupme = responsesArray[i]
     var groupmeDateToUnix = new Date(groupme.date)
-    if ((authorId!= "" && groupme.authorId==authorId)||(authorId=="") 
+    if ((authorId != [] && authorId.includes(groupme.authorId))|| (authorId==[]) 
       && ((beforeDate!="Invalid Date"&&groupmeDateToUnix < beforeDate)||(beforeDate=="Invalid Date")) 
       && ((afterDate!="Invalid Date"&&groupmeDateToUnix > afterDate)||(afterDate=="Invalid Date"))
       && ((searchText!=""&&groupme.text!=null&&groupme.text.toLowerCase().includes(searchText.toLowerCase()))||(searchText==""))) {
